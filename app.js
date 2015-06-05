@@ -4,7 +4,10 @@
  */
 
 var express = require('express')
-  , routes = require('./routes');
+  , routes = require('./routes')
+  , MongoClient = require('mongodb').MongoClient
+  , assert = require('assert')
+  ;
 
 var app = module.exports = express.createServer();
 
@@ -30,6 +33,20 @@ app.configure('production', function(){
 // Routes
 
 app.get('/', routes.index);
+
+app.post('/', function(request, response){
+  var url = "mongodb://localhost:27015/avoider";
+  MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    console.log("Connected to MongoDB");
+    db.close();
+  });
+
+
+  console.log(request.body);
+  response.send(request.body);
+});
+
 
 app.listen(3000, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
