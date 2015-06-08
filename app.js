@@ -5,9 +5,24 @@
 
 var express = require('express')
   , routes = require('./routes')
+  , Db = require('mongodb').Db
   , MongoClient = require('mongodb').MongoClient
+  , Server = require('mongodb').Server
   , assert = require('assert')
   ;
+
+var url = "mongodb://localhost:27015/avoider";
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected to MongoDB");
+});
+
+var db = new Db('test', new Server('localhost', 27015));
+db.open(function(err, db) {
+  var collection = db.collection("simple");
+  collection.insert({hello:'world'});
+  console.log('inserted successfully');
+});
 
 var app = module.exports = express.createServer();
 
@@ -35,14 +50,13 @@ app.configure('production', function(){
 app.get('/', routes.index);
 
 app.post('/', function(request, response){
-  var url = "mongodb://localhost:27015/avoider";
-  MongoClient.connect(url, function(err, db) {
-    assert.equal(null, err);
-    console.log("Connected to MongoDB");
-    db.close();
+  db.open(function(err, db) {
+    var collection = db.collection("simple");
+    collection.insert({hello:'world', mello:'test2'});
+    console.log('inserted successfully world');
   });
 
-
+  console.log('inserted');
   console.log(request.body);
   response.send(request.body);
 });
